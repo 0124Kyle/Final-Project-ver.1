@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>東吳大學二手書交易平台 - 註冊</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <div id="registerForm" class="container mx-auto px-4 py-8">
+        <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl">
+            <div class="md:flex">
+                <div class="md:flex-shrink-0">
+                    <img class="h-48 w-full object-cover md:w-48" src="https://www.scu.edu.tw/student/2006/student_1/images/s1_logo.gif" alt="東吳大學校園">
+                </div>
+                <div class="p-8">
+                    <h2 class="uppercase tracking-wide text-3xl text-indigo-500 font-semibold mb-4">註冊</h2>
+                    <p class="mb-4">加入我們，開始你的二手交易之旅。</p>
+                    
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="mb-4 p-4 rounded-md {% if category == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                    
+                    <form action="{{ url_for('register') }}" method="POST">
+                        <div class="mb-4">
+                            <label for="student_id" class="block text-gray-700 text-sm font-bold mb-2">學號</label>
+                            <input type="text" id="student_id" name="student_id" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        </div>
+                        <div class="mb-4">
+                            <label for="user_name" class="block text-gray-700 text-sm font-bold mb-2">姓名</label>
+                            <input type="text" id="user_name" name="user_name" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        </div>
+                        <div class="mb-4">
+                            <label for="email" class="block text-gray-700 text-sm font-bold mb-2">電子郵件</label>
+                            <input type="email" id="email" name="email" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        </div>
+                        <div class="mb-4">
+                            <label for="phone" class="block text-gray-700 text-sm font-bold mb-2">電話</label>
+                            <input type="tel" id="phone" name="phone" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        </div>
+                        <div class="mb-4">
+                            <label for="password" class="block text-gray-700 text-sm font-bold mb-2">密碼</label>
+                            <input type="password" id="password" name="password" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        </div>
+                        <div class="mb-6">
+                            <label for="confirm_password" class="block text-gray-700 text-sm font-bold mb-2">確認密碼</label>
+                            <input type="password" id="confirm_password" name="confirm_password" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        </div>
+                        <div class="mb-6">
+                            <label for="department" class="block text-gray-700 text-sm font-bold mb-2">系所</label>
+                            <select name="department" id="department" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                <option value="">請選擇系所</option>
+                                <option value="資料科學系">資料科學系</option>
+                                <option value="歷史學系">歷史學系</option>
+                                <option value="社會學系">社會學系</option>
+                                <option value="英文學系">英文學系</option>
+                                <option value="政治學系">政治學系</option>
+                                <option value="經濟學系">經濟學系</option>
+                                <option value="法律學系">法律學系</option>
+                                <option value="心理學系">心理學系</option>
+                                <option value="會計學系">會計學系</option>
+                                <option value="物理學系">物理學系</option>
+                                <option value="化學系">化學系</option>
+                                <option value="數學系">數學系</option>
+                                <option value="企業管理學系">企業管理學系</option>
+                                <option value="資訊管理學系">資訊管理學系</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <button type="submit" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                                註冊
+                            </button>
+                            <a href="{{ url_for('login') }}" class="inline-block align-baseline font-bold text-sm text-indigo-500 hover:text-indigo-800">
+                                已有帳號？登入
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

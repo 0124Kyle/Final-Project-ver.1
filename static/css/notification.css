@@ -1,0 +1,56 @@
+/* 重置按鈕樣式 */
+#notificationButton {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    outline: none;
+}
+
+/* 確保下拉選單顯示在其他元素上方 */
+#notificationDropdown {
+    z-index: 1000;
+}
+
+/* 通知項目樣式 */
+.notification-item {
+    border-bottom: 1px solid #e5e7eb;
+    transition: background-color 0.2s;
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+/* 未讀通知樣式 */
+.notification-item.bg-blue-50 {
+    position: relative;
+}
+
+.notification-item.bg-blue-50::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: #3b82f6;
+}
+
+/* 優化滾動條 */
+#notificationList::-webkit-scrollbar {
+    width: 6px;
+}
+
+#notificationList::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+#notificationList::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 3px;
+}
+
+#notificationList::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+}

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>東吳大學二手書交易平台 - 發布書籍</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/notification.css') }}">
+    <script src="{{ url_for('static', filename='js/notification.js') }}"></script>
+    <script type="text/javascript" src="{{url_for('static',filename='js/Post_success.js')}}"></script>
+</head>
+<body class="bg-gray-100">
+    <!-- 新的導航欄 -->
+    <nav class="bg-white shadow">
+        <div class="container mx-auto px-6 py-3">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <a href="{{url_for('index')}}" class="text-xl font-semibold text-gray-700">東吳大學二手書交易平台</a>
+                <div class="w-full md:w-1/3 mb-4 md:mb-0">
+                    <form action="{{ url_for('search') }}" method="GET" class="flex">
+                        <input type="text" name="q" placeholder="搜尋商品..." class="flex-grow px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                        <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-r-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </button> 
+                    </form>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="{{url_for('index')}}" class="text-indigo-600 font-medium">首頁</a>
+                    <a href="{{url_for('about')}}" class="text-gray-800 hover:text-indigo-600">關於</a>
+                    <a href="{{url_for('post_products')}}" class="text-gray-800 hover:text-indigo-600">發布書籍</a>
+                    <a href="{{url_for('shopping_cart')}}" class="text-gray-800 hover:text-indigo-600">購物車</a>
+                    <a href="{{url_for('profile')}}" class="text-gray-800 hover:text-indigo-600">個人資料</a>
+                    <div class="relative" id="notificationComponent">
+                        <!-- 通知按鈕 -->
+                        <button type="button" id="notificationButton" class="flex items-center p-2 rounded-lg hover:bg-gray-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                            <span id="notificationCount" class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hidden">0</span>
+                        </button>
+                    
+                        <!-- 通知下拉選單 -->
+                        <div id="notificationDropdown" class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 hidden" style="z-index: 1000;">
+                            <div class="p-4 border-b border-gray-200">
+                                <h3 class="text-lg font-semibold text-gray-700">通知</h3>
+                            </div>
+                            <div id="notificationList" class="max-h-96 overflow-y-auto">
+                                <!-- 通知將由 JavaScript 動態添加 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-2xl mx-auto">
+            <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">發布二手書籍</h1>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="mb-4 p-4 rounded-md {% if category == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- 表單 -->
+            <form id="postForm" class="bg-white shadow-md rounded-lg p-6 mb-4" enctype="multipart/form-data" method="POST">
+                <!-- 書籍名稱 -->
+                <div class="mb-6">
+                    <label for="name" class="block text-gray-700 text-sm font-bold mb-2">書籍名稱 *</label>
+                    <input type="text" id="name" name="name" required
+                        class="shadow-sm appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500"
+                        placeholder="請輸入書籍名稱">
+                </div>
+
+                <!-- 書籍描述 -->
+                <div class="mb-6">
+                    <label for="description" class="block text-gray-700 text-sm font-bold mb-2">書籍描述 *</label>
+                    <textarea id="description" name="description" required
+                        class="shadow-sm appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500"
+                        rows="4" placeholder="請詳細描述書籍狀況、購買時間等信息"></textarea>
+                </div>
+
+                <!-- 價格 -->
+                <div class="mb-6">
+                    <label for="price" class="block text-gray-700 text-sm font-bold mb-2">價格 (NT$) *</label>
+                    <input type="number" id="price" name="price" required min="0"
+                        class="shadow-sm appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500"
+                        placeholder="請輸入售價">
+                </div>
+
+                <!-- 科系類別 -->
+                <div class="mb-6">
+                    <label for="category" class="block text-gray-700 text-sm font-bold mb-2">科系類別 *</label>
+                    <select id="category" name="category" required
+                        class="shadow-sm appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500">
+                        <option value="">選擇科系</option>
+                        <option value="資料科學系">資料科學系</option>
+                        <option value="歷史學系">歷史學系</option>
+                        <option value="社會學系">社會學系</option>
+                        <option value="英文學系">英文學系</option>
+                        <option value="政治學系">政治學系</option>
+                        <option value="經濟學系">經濟學系</option>
+                        <option value="法律學系">法律學系</option>
+                        <option value="心理學系">心理學系</option>
+                        <option value="會計學系">會計學系</option>
+                        <option value="物理學系">物理學系</option>
+                        <option value="化學系">化學系</option>
+                        <option value="數學系">數學系</option>
+                        <option value="企業管理學系">企業管理學系</option>
+                        <option value="資訊管理學系">資訊管理學系</option>
+                    </select>
+                </div>
+
+                <!-- 圖片上傳 -->
+                <div class="mb-6">
+                    <label for="image" class="block text-gray-700 text-sm font-bold mb-2">上傳書籍圖片 *</label>
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                        <div class="space-y-1 text-center">
+                            <img id="imagePreview" src="#" alt="圖片預覽" class="mx-auto h-32 hidden mb-4">
+                            <div class="flex text-sm text-gray-600">
+                                <label for="image" class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
+                                    <span>選擇圖片</span>
+                                    <input id="image" name="image" type="file" accept="image/*" required class="sr-only">
+                                </label>
+                                <p class="pl-1">或將檔案拖曳至此</p>
+                            </div>
+                            <p class="text-xs text-gray-500">
+                                PNG, JPG, GIF 最大 10MB
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 提交按鈕 -->
+                <div class="flex items-center justify-end">
+                    <button id="submitBtn" type="submit"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                        發布書籍
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 成功模態框 -->
+    <div id="successModal" class="fixed z-10 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <svg class="h-6 w-6 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                發布成功！
+                            </h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500">
+                                    您的書籍已成功發布到交易平台。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" id="closeModal"
+                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        關閉
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
