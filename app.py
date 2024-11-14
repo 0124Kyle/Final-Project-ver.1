@@ -18,7 +18,7 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 db_config = {
     'user': 'root',
     'password': 'blacklair085', # Use your password
-    'host': 'localhost',
+    'host': '127.0.0.1',
     'database': 'secondhand_platform'
 }
 
@@ -1575,4 +1575,4 @@ def page_not_found(e):
     return f"404 Not Found: {request.url}", 404
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, host='0.0.0.0', port=5000)
+    socketio.run(app, debug=True)
