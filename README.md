@@ -17,6 +17,6 @@
 3. Open CMD to run py app.py or python app.py.
 ---
 # Website Structure
-* Frontend : HTML(in templates), CSS, Javascript(in static)
-* Backend : Python(Flask)
+* Frontend : HTML (in templates), CSS, Javascript (in static)
+* Backend : Python 3.11.2 (Flask)
 * Database : MySQL
