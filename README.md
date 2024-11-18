@@ -1,6 +1,6 @@
 # Website Information
 * Name : Soochow University Secondhand Platform
-* Website Goal : Let all university students can buy secondhand textbooks with lower price or sell useless textbook.
+* Website Goal : Let all university students can buy secondhand textbooks with lower price or sell useless textbooks.
 * Website Features:
   1. Users register and login with student ID.
   2. Products Selling.
