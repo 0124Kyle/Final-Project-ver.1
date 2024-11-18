@@ -1195,15 +1195,6 @@ def edit_profile():
 
 # 信用評分計算
 def calculate_credit_score(user_name):
-    """
-    計算用戶的信用評分
-    基本分數：80分
-    根據訂單完成率調整：
-    - 完成率 >= 90%: 95-100分
-    - 完成率 >= 80%: 85-94分
-    - 完成率 >= 70%: 75-84分
-    - 完成率 < 70%: 60-74分
-    """
     try:
         conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor(dictionary=True)
@@ -1241,6 +1232,139 @@ def calculate_credit_score(user_name):
     except mysql.connector.Error as err:
         app.logger.error(f"Database error in calculate_credit_score: {err}")
         return 80  # 發生錯誤時返回基本分數
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'conn' in locals():
+            conn.close()
+            
+@app.route('/api/transaction-stats')
+def get_transaction_stats():
+    if 'user_id' not in session:
+        app.logger.error('User not authenticated')
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    app.logger.info(f'Starting transaction stats request for user_id: {session["user_id"]}')
+    
+    try:
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor(dictionary=True)
+        
+        # 1. 獲取用戶信息
+        cursor.execute("""
+            SELECT user_name, COALESCE(credit_score, 80) as credit_score 
+            FROM users 
+            WHERE id = %s
+        """, (session['user_id'],))
+        
+        user = cursor.fetchone()
+        if not user:
+            app.logger.warning(f"No user found for id: {session['user_id']}")
+            return jsonify({'error': 'User not found'}), 404
+            
+        user_name = user['user_name']
+        
+        # 準備響應數據
+        response_data = {
+            'creditScore': int(user['credit_score']),
+            'monthly': [],
+            'status': {
+                'completed': 0,
+                'processing': 0,
+                'cancelled': 0
+            },
+            'summary': {
+                'totalTransactions': 0,
+                'totalPurchases': 0,
+                'totalSales': 0,
+                'avgAmount': 0
+            }
+        }
+
+        # 2. 獲取月度數據 - 修正表別名
+        cursor.execute("""
+            SELECT 
+                DATE_FORMAT(o.created_at, '%Y-%m') as month,
+                COUNT(CASE WHEN o.buyer_name = %s THEN 1 END) as buying,
+                COUNT(CASE WHEN o.seller_name = %s THEN 1 END) as selling
+            FROM orders o
+            WHERE o.created_at >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+                AND (o.buyer_name = %s OR o.seller_name = %s)
+            GROUP BY DATE_FORMAT(o.created_at, '%Y-%m')
+            ORDER BY month
+        """, (user_name, user_name, user_name, user_name))
+        
+        monthly_data = cursor.fetchall()
+        app.logger.info(f"Monthly data: {monthly_data}")
+        
+        response_data['monthly'] = [
+            {
+                'month': row['month'],
+                'buying': int(row['buying'] or 0),
+                'selling': int(row['selling'] or 0)
+            } for row in monthly_data
+        ]
+
+        # 3. 獲取訂單狀態 - 修正表別名
+        cursor.execute("""
+            SELECT 
+                COUNT(CASE WHEN o.status = '已完成' THEN 1 END) as completed,
+                COUNT(CASE WHEN o.status = '未完成' THEN 1 END) as processing,
+                COUNT(CASE WHEN o.status = '已取消' THEN 1 END) as cancelled
+            FROM orders o
+            WHERE o.buyer_name = %s OR o.seller_name = %s
+        """, (user_name, user_name))
+        
+        status_data = cursor.fetchone()
+        app.logger.info(f"Status data: {status_data}")
+        
+        if status_data:
+            response_data['status'] = {
+                'completed': int(status_data['completed'] or 0),
+                'processing': int(status_data['processing'] or 0),
+                'cancelled': int(status_data['cancelled'] or 0)
+            }
+
+        # 4. 獲取交易摘要 - 修正表別名和欄位引用
+        cursor.execute("""
+            SELECT 
+                COUNT(DISTINCT o.id) as total_transactions,
+                COUNT(DISTINCT CASE WHEN o.buyer_name = %s THEN o.id END) as total_purchases,
+                COUNT(DISTINCT CASE WHEN o.seller_name = %s THEN o.id END) as total_sales,
+                COALESCE(AVG(p.price), 0) as avg_amount
+            FROM orders o
+            LEFT JOIN products p ON o.product_name = p.name
+            WHERE o.buyer_name = %s OR o.seller_name = %s
+        """, (user_name, user_name, user_name, user_name))
+        
+        summary_data = cursor.fetchone()
+        app.logger.info(f"Summary data: {summary_data}")
+        
+        if summary_data:
+            response_data['summary'] = {
+                'totalTransactions': int(summary_data['total_transactions'] or 0),
+                'totalPurchases': int(summary_data['total_purchases'] or 0),
+                'totalSales': int(summary_data['total_sales'] or 0),
+                'avgAmount': round(float(summary_data['avg_amount'] or 0), 2)
+            }
+
+        app.logger.info(f"Final response data: {response_data}")
+        return jsonify(response_data)
+        
+    except mysql.connector.Error as err:
+        app.logger.error(f"Database error: {err}")
+        return jsonify({
+            'error': 'Database error occurred',
+            'message': str(err)
+        }), 500
+        
+    except Exception as e:
+        app.logger.error(f"Unexpected error: {str(e)}", exc_info=True)
+        return jsonify({
+            'error': 'Unexpected error occurred',
+            'message': str(e)
+        }), 500
+        
     finally:
         if 'cursor' in locals():
             cursor.close()

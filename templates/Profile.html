@@ -99,37 +99,54 @@
             <!-- 訂單紀錄 -->
             <section id="order-history" class="content-section bg-white shadow-md rounded-lg p-6 hidden">
                 <h2 class="text-2xl font-bold mb-4">訂單紀錄</h2>
-                <div class="mt-6">
-                    <h3 class="text-xl font-bold mb-2">信用評分</h3>
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-lg font-medium">您的信用評分：{{ user.credit_score }}/100</span>
-                        {% if user.credit_score >= 90 %}
-                            <span class="text-green-600 font-medium">優良</span>
-                        {% elif user.credit_score >= 80 %}
-                            <span class="text-blue-600 font-medium">良好</span>
-                        {% elif user.credit_score >= 70 %}
-                            <span class="text-yellow-600 font-medium">普通</span>
-                        {% else %}
-                            <span class="text-red-600 font-medium">需要改善</span>
-                        {% endif %}
+                <div id="transaction-dashboard" class="space-y-6 mb-12">
+                    <!-- 信用評分和統計概覽 -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <!-- 信用評分 -->
+                        <div class="bg-white p-4 rounded-lg shadow-md">
+                            <h4 class="text-sm font-medium text-gray-500 mb-2">信用評分</h4>
+                            <div class="relative h-40">  <!-- 保持容器高度 -->
+                                <canvas id="creditScoreGauge"></canvas>
+                                <div class="absolute inset-0 flex items-center justify-center flex-col" style="padding-top: 40px">  <!-- 添加上方內距 -->
+                                    <span id="creditScoreText" class="text-4xl font-bold mb-1"></span>
+                                    <span id="creditScoreLabel" class="text-sm font-medium"></span>
+                                    <span class="text-xs text-gray-500 mt-1">/ 100</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 總交易次數 -->
+                        <div class="bg-white p-4 rounded-lg shadow-md">
+                            <h4 class="text-sm font-medium text-gray-500 mb-2">總交易次數</h4>
+                            <div id="totalTransactions" class="text-2xl font-bold text-indigo-600">-</div>
+                        </div>
+                        
+                        <!-- 買入/賣出比例 -->
+                        <div class="bg-white p-4 rounded-lg shadow-md">
+                            <h4 class="text-sm font-medium text-gray-500 mb-2">買入/賣出</h4>
+                            <div id="tradeRatio" class="text-2xl font-bold text-green-600">-</div>
+                        </div>
+                        
+                        <!-- 平均交易金額 -->
+                        <div class="bg-white p-4 rounded-lg shadow-md">
+                            <h4 class="text-sm font-medium text-gray-500 mb-2">平均交易金額</h4>
+                            <div id="avgAmount" class="text-2xl font-bold text-blue-600">-</div>
+                        </div>
                     </div>
-        
-                    <!-- 進度條 -->
-                    <div class="w-full bg-gray-200 rounded-full h-4 dark:bg-gray-700">
-                        <div class="h-4 rounded-full transition-all duration-500 ease-out
-                            {% if user.credit_score >= 90 %}
-                                bg-green-500
-                            {% elif user.credit_score >= 80 %}
-                                bg-blue-500
-                            {% elif user.credit_score >= 70 %}
-                                bg-yellow-500
-                            {% else %}
-                                bg-red-500
-                            {% endif %}"
-                            style="width: {{ user.credit_score }}%">
+                
+                    <!-- 圖表區域 -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white p-4 rounded-lg shadow-md">
+                            <canvas id="transactionTrend"></canvas>
+                        </div>
+                        
+                        <div class="bg-white p-4 rounded-lg shadow-md">
+                            <canvas id="orderCompletion"></canvas>
                         </div>
                     </div>
                 </div>
+
+                <div class="border-t border-gray-200 my-8"></div>
                 
                 <div class="mb-8">
                     <h3 class="text-xl font-bold mb-4">我的購買</h3>
@@ -474,5 +491,7 @@
 
     <script type="text/javascript" src="{{ url_for('static', filename='js/chat.js') }}"></script>
     {% endif %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/Dashboard.js') }}"></script>
 </body>
 </html>
