@@ -6,7 +6,7 @@
     <title>東吳大學二手書交易平台 - 關於</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/notification.css') }}">
-    <script src="{{ url_for('static', filename='js/notification.js') }}"></script>"
+    <script src="{{ url_for('static', filename='js/notification.js') }}"></script>
 </head>
 <body class="bg-gray-100">
     <!-- 新的導航欄 -->
@@ -28,12 +28,8 @@
                     <a href="{{url_for('index')}}" class="text-indigo-600 font-medium">首頁</a>
                     <a href="{{url_for('about')}}" class="text-gray-800 hover:text-indigo-600">關於</a>
                     <a href="{{url_for('post_products')}}" class="text-gray-800 hover:text-indigo-600">發布書籍</a>
-                    <a href="{{url_for('shopping_cart')}}" class="text-gray-800 hover:text-indigo-600">
-                        購物車
-                        <span id="cartCount" class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full ml-1 hidden"></span>
-                    </a>
+                    <a href="{{url_for('shopping_cart')}}" class="text-gray-800 hover:text-indigo-600">購物車</a>
                     <a href="{{url_for('profile')}}" class="text-gray-800 hover:text-indigo-600">個人資料</a>
-                    
                     <div class="relative" id="notificationComponent">
                         <!-- 通知按鈕 -->
                         <button type="button" id="notificationButton" class="flex items-center p-2 rounded-lg hover:bg-gray-100">
@@ -48,8 +44,9 @@
                             <div class="p-4 border-b border-gray-200">
                                 <h3 class="text-lg font-semibold text-gray-700">通知</h3>
                             </div>
-
-                            <div id="notificationList" class="max-h-96 overflow-y-auto"></div>
+                            <div id="notificationList" class="max-h-96 overflow-y-auto">
+                                <!-- 通知將由 JavaScript 動態添加 -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -58,10 +55,8 @@
     </nav>
 
     <div class="container mx-auto px-4 py-8">
-        <h1 class="text-2xl font-bold mb-6">商品管理</h1>
-        
         <div class="container mx-auto px-4 py-8">
-            <h1 class="text-2xl font-bold mb-6">編輯商品</h1>
+            <h1 class="text-2xl font-bold text-center mb-6">編輯商品</h1>
             
             <form action="{{ url_for('edit_product', product_id=product.id) }}" method="POST" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
                 <div class="mb-4">
