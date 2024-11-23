@@ -66,9 +66,9 @@ function initializeCreditScore(score = 80) {
     }
 }
 
-// 初始化月度交易趨勢圖表
-function initializeTransactionTrend(monthlyData = []) {
-    console.log('Initializing transaction trend chart with:', monthlyData);
+// 初始化每日交易趨勢圖表
+function initializeTransactionTrend(dailyData = []) {
+    console.log('Initializing transaction trend chart with:', dailyData);
     const trendElement = document.getElementById('transactionTrend');
     
     if (!trendElement) {
@@ -79,30 +79,32 @@ function initializeTransactionTrend(monthlyData = []) {
     const ctx = trendElement.getContext('2d');
 
     // 如果沒有數據，使用預設數據
-    if (!monthlyData.length) {
-        monthlyData = [{ month: '本月', buying: 0, selling: 0 }];
+    if (!dailyData.length) {
+        dailyData = [{ day: '今天', buying: 0, selling: 0 }];
     }
 
     new Chart(ctx, {
-        type: 'line',
+        type: 'bar',
         data: {
-            labels: monthlyData.map(item => item.month),
+            labels: dailyData.map(item => item.day),
             datasets: [
                 {
                     label: '購買數量',
-                    data: monthlyData.map(item => Number(item.buying) || 0),
+                    data: dailyData.map(item => Number(item.buying) || 0),
+                    backgroundColor: 'rgba(59, 130, 246, 0.8)',
                     borderColor: '#3B82F6',
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                    tension: 0.3,
-                    fill: true
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    barPercentage: 0.6
                 },
                 {
-                    label: '販售數量',
-                    data: monthlyData.map(item => Number(item.selling) || 0),
+                    label: '販售數量', 
+                    data: dailyData.map(item => Number(item.selling) || 0),
+                    backgroundColor: 'rgba(16, 185, 129, 0.8)',
                     borderColor: '#10B981',
-                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                    tension: 0.3,
-                    fill: true
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    barPercentage: 0.6
                 }
             ]
         },
@@ -110,7 +112,7 @@ function initializeTransactionTrend(monthlyData = []) {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { 
+                legend: {
                     position: 'top',
                     labels: {
                         boxWidth: 12,
@@ -120,6 +122,11 @@ function initializeTransactionTrend(monthlyData = []) {
                 }
             },
             scales: {
+                x: {
+                    grid: {
+                        display: false
+                    }
+                },
                 y: {
                     beginAtZero: true,
                     ticks: { stepSize: 1 }
@@ -223,33 +230,34 @@ function updateSummary(summary = {
 
 // 初始化儀表板
 async function initializeDashboard() {
-    console.log('Initializing dashboard...');
+    console.log('初始化儀表板...');
     
     try {
         const response = await fetch('/api/transaction-stats');
-        console.log('API Response status:', response.status);
+        console.log('API 回應狀態:', response.status);
         
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`HTTP 錯誤! 狀態碼: ${response.status}`);
         }
         
         const data = await response.json();
-        console.log('Received data:', data);
+        console.log('收到的資料:', data);
 
+        // 初始化各個圖表
         initializeCreditScore(data.creditScore);
-        initializeTransactionTrend(data.monthly);
+        initializeTransactionTrend(data.daily); // 改用 daily 而不是 monthly
         initializeOrderCompletion(data.status);
         updateSummary(data.summary);
 
     } catch (error) {
-        console.error('Error initializing dashboard:', error);
-        // 顯示錯誤信息
+        console.error('初始化儀表板時發生錯誤:', error);
+        // 顯示錯誤訊息
         const dashboardElement = document.getElementById('transaction-dashboard');
         if (dashboardElement) {
             dashboardElement.innerHTML = `
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
                     <strong class="font-bold">載入失敗！</strong>
-                    <span class="block sm:inline">無法載入交易數據，請稍後再試。</span>
+                    <span class="block sm:inline">無法載入交易資料，請稍後再試。</span>
                     <p class="text-sm">${error.message}</p>
                 </div>
             `;

@@ -1284,25 +1284,25 @@ def get_transaction_stats():
         # 2. 獲取月度數據 - 修正表別名
         cursor.execute("""
             SELECT 
-                DATE_FORMAT(o.created_at, '%Y-%m') as month,
+                DATE_FORMAT(o.created_at, '%Y-%m-%d') as day,
                 COUNT(CASE WHEN o.buyer_name = %s THEN 1 END) as buying,
                 COUNT(CASE WHEN o.seller_name = %s THEN 1 END) as selling
             FROM orders o
-            WHERE o.created_at >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+            WHERE o.created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
                 AND (o.buyer_name = %s OR o.seller_name = %s)
-            GROUP BY DATE_FORMAT(o.created_at, '%Y-%m')
-            ORDER BY month
+            GROUP BY DATE_FORMAT(o.created_at, '%Y-%m-%d')
+            ORDER BY day
         """, (user_name, user_name, user_name, user_name))
         
-        monthly_data = cursor.fetchall()
-        app.logger.info(f"Monthly data: {monthly_data}")
+        daily_data = cursor.fetchall()
+        app.logger.info(f"Daily data: {daily_data}")
         
-        response_data['monthly'] = [
+        response_data['daily'] = [
             {
-                'month': row['month'],
+                'day': row['day'],
                 'buying': int(row['buying'] or 0),
                 'selling': int(row['selling'] or 0)
-            } for row in monthly_data
+            } for row in daily_data
         ]
 
         # 3. 獲取訂單狀態 - 修正表別名
