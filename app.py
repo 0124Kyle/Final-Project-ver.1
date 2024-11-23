@@ -1458,7 +1458,7 @@ def update_all_credit_scores():
             # 更新用戶的信用分數
             cursor.execute("""
                 UPDATE users 
-                SET credit_score = %s 
+                SET credit_score = %d
                 WHERE user_name = %s
             """, (score, user['user_name']))
             
