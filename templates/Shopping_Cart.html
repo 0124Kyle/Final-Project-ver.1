@@ -93,7 +93,18 @@
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
-                                        <img src="{{ url_for('static', filename='uploads/' + item.image_path) }}" alt="{{ item.product_name }}" class="w-16 h-16 object-cover mr-4">
+                                        {% if item.image_path %}
+                                            {% set filename = item.image_path.split('\\')[-1] %}
+                                            <img src="{{ url_for('static', filename='uploads/' + filename) }}" 
+                                                 alt="{{ item.product_name }}" 
+                                                 class="w-16 h-16 object-cover mr-4"
+                                                 onerror="this.src='{{ url_for('static', filename='images/default.jpg') }}'"
+                                            >
+                                        {% else %}
+                                            <img src="{{ url_for('static', filename='images/default.png') }}" 
+                                                 alt="默認圖片" 
+                                                 class="w-16 h-16 object-cover mr-4">
+                                        {% endif %}
                                         <div class="text-sm font-medium text-gray-900">{{ item.product_name }}</div>
                                     </div>
                                 </td>

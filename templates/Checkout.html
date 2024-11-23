@@ -68,9 +68,18 @@
                             <input type="hidden" name="product_name[]" value="{{ item.name }}">
                             <input type="hidden" name="seller_name[]" value="{{ item.seller_name }}">
                             <div class="flex items-center space-x-4">
-                                <img src="{{ url_for('static', filename=item.image_path) }}" 
-                                     alt="{{ item.name }}" 
-                                     class="w-16 h-16 object-cover rounded">
+                                {% if item.image_path %}
+                                        {% set filename = item.image_path.split('\\')[-1] %}
+                                        <img src="{{ url_for('static', filename='uploads/' + filename) }}" 
+                                             alt="{{ item.product_name }}" 
+                                             class="w-16 h-16 object-cover mr-4"
+                                             onerror="this.src='{{ url_for('static', filename='images/default.jpg') }}'"
+                                        >
+                                        {% else %}
+                                            <img src="{{ url_for('static', filename='images/default.png') }}" 
+                                                 alt="默認圖片" 
+                                                 class="w-16 h-16 object-cover mr-4">
+                                        {% endif %}
                                 <div>
                                     <p class="font-medium">{{ item.name }}</p>
                                     <p class="text-gray-600">NT$ {{ item.price }}</p>
